@@ -1,0 +1,78 @@
+spring:
+  application:
+    name: myshop-service-search-provider
+  datasource:
+    druid:
+      url: jdbc:mysql://192.168.2.135:3306/myshop?useUnicode=true&characterEncoding=utf-8&useSSL=false
+      username: root
+      password: 123456
+      initial-size: 1
+      min-idle: 1
+      max-active: 20
+      test-on-borrow: true
+      driver-class-name: com.mysql.cj.jdbc.Driver
+  redis:
+    lettuce:
+      pool:
+        max-active: 8
+        max-idle: 8
+        max-wait: -1ms
+        min-idle: 0
+    sentinel:
+      master: mymaster
+      nodes: 192.168.2.129:26379, 192.168.2.129:26380, 192.168.2.129:26381
+  data:
+    solr:
+      host: http://192.168.2.129:8983/solr/ik_core
+server:
+  port: 8504
+mybatis:
+  configuration:
+    cache-enabled: true
+  type-aliases-package: com.spike.myshop.commons.domain
+  mapper-locations: classpath:mapper/*.xml
+services:
+  versions:
+    search:
+      v1: 1.0.0
+dubbo:
+  scan:
+    basePackages: com.spike.myshop.service.search.provider.api.impl
+  application:
+    id: myshop-service-search-provider
+    name: myshop-service-search-provider
+    qos-port: 22225
+    qos-enable: true
+  protocol:
+    id: dubbo
+    name: dubbo
+    port: 20884
+    status: server
+    serialization: kryo
+  registry:
+    id: zookeeper
+    address: zookeeper://192.168.2.129:2181?backup=192.168.2.129:2182,192.168.2.129:2183
+
+# Enables Dubbo All Endpoints
+management:
+  endpoint:
+    dubbo:
+      enabled: true
+    dubbo-shutdown:
+      enabled: true
+    dubbo-configs:
+      enabled: true
+    dubbo-services:
+      enabled: true
+    dubbo-references:
+      enabled: true
+    dubbo-properties:
+      enabled: true
+  # Dubbo Health
+  health:
+    dubbo:
+      status:
+        ## StatusChecker Name defaults (default : "memory", "load" )
+        defaults: memory
+        ## StatusChecker Name extras (default : empty )
+        extras: load,threadpool
